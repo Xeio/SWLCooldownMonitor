@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?> 
+<Root>
+  <Value name="CooldownMonitor" value="true" />
+  <Value name="CooldownMonitor_AddCooldownUrl" value="http://swlcooldowns.azurewebsites.net/" />
+  <Archive name="CooldownMonitor_Cfg" />
+</Root>
