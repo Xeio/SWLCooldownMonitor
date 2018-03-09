@@ -1,6 +1,5 @@
 package com.xeio.swlcooldowns
 
-import android.annotation.TargetApi
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -12,6 +11,7 @@ import android.support.v4.app.NotificationManagerCompat
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import android.support.annotation.RequiresApi
 
 class MissionCompleteJob : Job() {
     override fun onRunJob(params: Params): Result {
@@ -22,7 +22,9 @@ class MissionCompleteJob : Job() {
         val cooldown = CooldownData.instance.cooldowns.first { it.agentId == agentId }
 
         if(cooldown != null){
-            createNotificationChannel(context)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                createNotificationChannel(context)
+            }
 
             val myIntent = Intent(context, CooldownsDisplay::class.java)
             val activityIntent = PendingIntent.getActivity(context, 0, myIntent, 0)
@@ -51,18 +53,14 @@ class MissionCompleteJob : Job() {
             CooldownData.instance.scheduleNextNotification(context)
         }
 
-        // run your job here
         return Result.SUCCESS
     }
 
-    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(context: Context){
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
         val name = context.getString(R.string.mission_complete_channel)
         val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT)
         channel.description = context.getString(R.string.mission_complete_channel_desc)
-        // Register the channel with the system
         val notificationManager = context.getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(channel)
     }
