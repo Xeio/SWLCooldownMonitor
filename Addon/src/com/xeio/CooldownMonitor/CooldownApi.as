@@ -67,6 +67,9 @@ class com.xeio.CooldownMonitor.CooldownApi
         }
         else
         {
+            for (var i in m_itemsToSubmit){
+                m_itemsToSubmit[i].TimeLeft -= 1;
+            }
             setTimeout(Delegate.create(this, Upload), 1000);
         }
     }
