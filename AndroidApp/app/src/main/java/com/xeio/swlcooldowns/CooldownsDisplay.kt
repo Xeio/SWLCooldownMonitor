@@ -13,15 +13,15 @@ import android.preference.PreferenceManager
 import android.support.v4.content.LocalBroadcastManager
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.microsoft.windowsazure.notifications.NotificationsManager;
-import android.content.Intent;
-import android.util.Log;
-import android.widget.Toast;
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.microsoft.windowsazure.notifications.NotificationsManager
+import android.content.Intent
+import android.util.Log
 import com.xeio.swlcooldowns.pushservices.CooldownPushNotificationHandler
 import com.xeio.swlcooldowns.pushservices.NotificationHubSettings
 import com.xeio.swlcooldowns.pushservices.RegistrationIntentService
+import com.evernote.android.job.JobManager
 
 class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener  {
     companion object{
@@ -55,6 +55,8 @@ class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferen
 
         NotificationsManager.handleNotifications(this, NotificationHubSettings.SenderId, CooldownPushNotificationHandler::class.java)
         registerWithNotificationHubs()
+
+        JobManager.create(this).addJobCreator(CooldownJobCreator())
     }
 
     private fun refresh(){
@@ -109,7 +111,6 @@ class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferen
             else -> super.onOptionsItemSelected(item)
         }
     }
-
 
     /**
      * Check the device to make sure it has the Google Play Services APK. If

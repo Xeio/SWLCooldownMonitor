@@ -39,6 +39,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-gcm:11.8.0'
     compile 'com.microsoft.azure:notification-hubs-android-sdk:0.4@aar'
     compile 'com.microsoft.azure:azure-notifications-handler:1.0.1@aar'
+    compile 'com.evernote:android-job:1.2.4'
 }
 
 apply plugin: 'com.google.gms.google-services'

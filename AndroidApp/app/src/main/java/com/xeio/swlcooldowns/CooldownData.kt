@@ -1,13 +1,15 @@
 package com.xeio.swlcooldowns
 
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 import android.preference.PreferenceManager
 import android.support.v4.content.LocalBroadcastManager
+import android.util.Log
 import android.widget.Toast
+import com.evernote.android.job.JobRequest
+import com.evernote.android.job.JobRescheduleService
+import com.evernote.android.job.util.support.PersistableBundleCompat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.experimental.CommonPool
@@ -51,19 +53,33 @@ class CooldownData
                 val intent = Intent("updated_cooldowns")
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
 
-                scheduleNotifications(context)
+                scheduleNextNotification(context)
             }
         }
     }
 
-    fun scheduleNotifications(context: Context) {
+    fun scheduleNextNotification(context: Context) {
         val it = cooldowns.sortedBy { it.timeLeft }.filter { !it.notified }.firstOrNull()
         if (it != null && it.timeLeft > 0) {
-            val intent = Intent(context, NotificationAlarmReceiver::class.java)
-            intent.putExtra("agentId", it.agentId)
-            val pendingIntent = PendingIntent.getBroadcast(context, it.agentId, intent, PendingIntent.FLAG_CANCEL_CURRENT)
-            val alarmMgr = context.getSystemService(AlarmManager::class.java)
-            alarmMgr.setExact(AlarmManager.RTC_WAKEUP, lastRetrievedRtc + it.timeLeft * 1000, pendingIntent)
+            Log.i("CooldownData", "Scheduling notification.")
+
+            val extras = PersistableBundleCompat()
+            extras.putInt("agentId", it.agentId)
+
+            val timeTillNextMission = lastRetrieved - SystemClock.elapsedRealtime() + it.timeLeft * 1000;
+
+            var builder = JobRequest.Builder(MissionCompleteJob.TAG)
+                    .setExact(timeTillNextMission)
+                    .addExtras(extras)
+                    .setUpdateCurrent(true)
+
+            builder = if(timeTillNextMission > 5000) {
+                builder.setExact(timeTillNextMission)
+            } else {
+                builder.startNow()
+            }
+
+            builder.build().schedule()
         }
     }
 }

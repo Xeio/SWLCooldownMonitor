@@ -79,4 +79,6 @@
     <string name="completed">Completed</string>
     <string name="cooldowns_updating">Cooldowns Updating</string>
     <string name="mission_complete">Mission Complete</string>
+    <string name="mission_complete_channel">Mission Completions</string>
+    <string name="mission_complete_channel_desc">Mission Complete Notifications</string>
 </resources>
