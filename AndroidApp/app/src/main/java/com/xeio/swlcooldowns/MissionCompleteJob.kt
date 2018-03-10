@@ -20,7 +20,7 @@ class MissionCompleteJob : Job() {
         val agentId = params.extras.getInt("agentId", 0)
         val character = params.extras.getString("character", "")
 
-        var cooldown = CooldownData.instance.cooldowns.firstOrNull { it.agentId == agentId && it.character == character}
+        val cooldown = CooldownData.instance.cooldowns.firstOrNull { it.agentId == agentId && it.character == character}
 
         if(cooldown != null){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -40,13 +40,19 @@ class MissionCompleteJob : Job() {
 //                    .setGroupSummary(true)
 //            notificationManager.notify(0, groupBuilder.build())
 
-            val agentBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+            var agentBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(R.drawable.agent_notifiction_icon)
                     .setContentIntent(activityIntent)
                     .setContentTitle(context.getString(R.string.mission_complete))
-                    .setContentText("${cooldown.character}: ${cooldown.agent} has completed a mission.")
                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                     .setAutoCancel(true)
+
+            agentBuilder = if(CooldownData.instance.characterCount > 1){
+                agentBuilder.setContentText("${cooldown.character}: ${cooldown.agent} has completed a mission.")
+            }else{
+                agentBuilder.setContentText("${cooldown.agent} has completed a mission.")
+            }
+
 //                    .setGroup("MISSION_COMPLETE")
             notificationManager.notify(cooldown.agentId xor cooldown.character.hashCode(), agentBuilder.build())
 

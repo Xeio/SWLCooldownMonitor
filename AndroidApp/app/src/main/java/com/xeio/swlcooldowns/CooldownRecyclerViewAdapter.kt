@@ -28,7 +28,11 @@ class AgentCooldownAdapter(val cooldowns: ArrayList<AgentMissionCoooldown>) : Re
         fun bindItems(cooldown: AgentMissionCoooldown) {
             itemView.agentName.text = cooldown.agent
             itemView.missionName.text = cooldown.mission
-            itemView.characterName.text = cooldown.character
+            if(CooldownData.instance.characterCount > 1) {
+                itemView.characterName.text = cooldown.character
+            }else {
+                itemView.characterName.visibility = View.GONE
+            }
 
             if(cooldown.timeLeft > 0) {
                 itemView.timer.isCountDown = true

@@ -24,6 +24,8 @@ class CooldownData
     }
 
     var cooldowns = ArrayList<AgentMissionCoooldown>()
+    var characterCount = 0
+        private set
 
     fun updateCooldowns(context: Context, character : String = "")
     {
@@ -42,31 +44,34 @@ class CooldownData
                             listOf(character)
                         }
 
+        if(character == ""){
+            characterCount = charNames.size
+        }
+
         async(CommonPool) {
-            if(charNames.any()) {
-                charNames.forEach {character ->
-                    val json = URL("http://swlcooldowns.azurewebsites.net/api/GetCharacterCooldowns?char=${URLEncoder.encode(character, "UTF-8")}").readText()
+            charNames.forEach {character ->
+                Log.i("CooldownData", "Fetching missions for character: $character")
+                val json = URL("http://swlcooldowns.azurewebsites.net/api/GetCharacterCooldowns?char=${URLEncoder.encode(character, "UTF-8")}").readText()
 
-                    val newCooldowns = try {
-                        Gson().fromJson<java.util.ArrayList<AgentMissionCoooldown>>(json, object : TypeToken<List<AgentMissionCoooldown>>() {}.getType())
-                    } catch (e: Exception){
-                        java.util.ArrayList<AgentMissionCoooldown>()
-                    }
-                    newCooldowns.forEach{ cooldown ->
-                        cooldown.lastRetrieved = SystemClock.elapsedRealtime()
-                        cooldown.character = character
-                    }
-
-                    cooldowns.removeIf{ it.character == character}
-                    cooldowns.addAll(newCooldowns)
-                    cooldowns.sortBy { it.lastRetrieved + it.timeLeft * 1000 }
+                val newCooldowns = try {
+                    Gson().fromJson<java.util.ArrayList<AgentMissionCoooldown>>(json, object : TypeToken<List<AgentMissionCoooldown>>() {}.getType())
+                } catch (e: Exception){
+                    java.util.ArrayList<AgentMissionCoooldown>()
+                }
+                newCooldowns.forEach{ cooldown ->
+                    cooldown.lastRetrieved = SystemClock.elapsedRealtime()
+                    cooldown.character = character
                 }
 
-                val intent = Intent("updated_cooldowns")
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
-
-                scheduleNextNotification(context)
+                cooldowns.removeIf{ it.character == character}
+                cooldowns.addAll(newCooldowns)
+                cooldowns.sortBy { it.lastRetrieved + it.timeLeft * 1000 }
             }
+
+            val intent = Intent("updated_cooldowns")
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+
+            scheduleNextNotification(context)
         }
     }
 
@@ -93,7 +98,7 @@ class CooldownData
 
             builder.build().schedule()
         } else {
-            JobManager.create(context).cancelAllForTag(MissionCompleteJob.TAG)
+            JobManager.instance().cancelAllForTag(MissionCompleteJob.TAG)
         }
     }
 }

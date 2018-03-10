@@ -35,7 +35,6 @@ class RegistrationIntentService : IntentService(TAG) {
 
             val tags = characterNames.filter { it != "" }.joinToString(",")
             if (regID == "" || storedToken !== FCM_token ) {
-                val hub = NotificationHub(NotificationHubSettings.HubName, NotificationHubSettings.HubListenConnectionString, this)
                 regID = hub.register(FCM_token, tags).registrationId
 
                 Log.d(TAG, "New NH Registration Successfully - RegId : " + regID)
