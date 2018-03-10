@@ -52,16 +52,10 @@ class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferen
             CooldownData.instance.updateCooldowns(this)
         }
 
-        floatingRefreshButton.onClick { refresh() }
-
         NotificationsManager.handleNotifications(this, NotificationHubSettings.SenderId, CooldownPushNotificationHandler::class.java)
         registerWithNotificationHubs()
 
         JobManager.create(this).addJobCreator(CooldownJobCreator())
-    }
-
-    private fun refresh(){
-        CooldownData.instance.updateCooldowns(this)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
@@ -107,6 +101,10 @@ class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferen
         return when (item.itemId) {
             R.id.action_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            R.id.action_refresh -> {
+                CooldownData.instance.updateCooldowns(this)
                 true
             }
             else -> super.onOptionsItemSelected(item)

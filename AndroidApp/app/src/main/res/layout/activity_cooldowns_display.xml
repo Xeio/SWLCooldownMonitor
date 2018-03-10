@@ -23,16 +23,4 @@
     <include
         android:id="@+id/include"
         layout="@layout/content_cooldowns_display" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingRefreshButton"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_margin="8dp"
-        android:clickable="true"
-        app:backgroundTint="@android:color/holo_green_dark"
-        app:layout_anchor="@+id/include"
-        app:layout_anchorGravity="bottom|clip_horizontal|end"
-        app:srcCompat="@drawable/ic_sync_black_24dp" />
-
 </android.support.design.widget.CoordinatorLayout>
