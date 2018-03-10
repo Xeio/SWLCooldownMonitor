@@ -18,8 +18,9 @@ class MissionCompleteJob : Job() {
         Log.i("NotificationAlarmReceiver", "Mission complete notification.")
 
         val agentId = params.extras.getInt("agentId", 0)
+        val character = params.extras.getString("character", "")
 
-        val cooldown = CooldownData.instance.cooldowns.first { it.agentId == agentId }
+        var cooldown = CooldownData.instance.cooldowns.firstOrNull { it.agentId == agentId && it.character == character}
 
         if(cooldown != null){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -29,24 +30,25 @@ class MissionCompleteJob : Job() {
             val myIntent = Intent(context, CooldownsDisplay::class.java)
             val activityIntent = PendingIntent.getActivity(context, 0, myIntent, 0)
 
-            val groupBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.notification_template_icon_bg)
-                    .setGroup("MISSION_COMPLETE")
-                    .setAutoCancel(true)
-                    .setGroupSummary(true)
+            val notificationManager = NotificationManagerCompat.from(context)
+
+//            val groupBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+//                    .setSmallIcon(R.drawable.notification_template_icon_bg)
+//                    .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
+//                    .setGroup("MISSION_COMPLETE")
+//                    .setAutoCancel(true)
+//                    .setGroupSummary(true)
+//            notificationManager.notify(0, groupBuilder.build())
 
             val agentBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.notification_template_icon_bg)
+                    .setSmallIcon(R.drawable.agent_notifiction_icon)
                     .setContentIntent(activityIntent)
                     .setContentTitle(context.getString(R.string.mission_complete))
-                    .setContentText("${cooldown.agent} has completed a mission.")
+                    .setContentText("${cooldown.character}: ${cooldown.agent} has completed a mission.")
                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                     .setAutoCancel(true)
-                    .setGroup("MISSION_COMPLETE")
-
-            val notificationManager = NotificationManagerCompat.from(context)
-            notificationManager.notify(0, groupBuilder.build())
-            notificationManager.notify(cooldown.agentId, agentBuilder.build())
+//                    .setGroup("MISSION_COMPLETE")
+            notificationManager.notify(cooldown.agentId xor cooldown.character.hashCode(), agentBuilder.build())
 
             cooldown.notified = true
 

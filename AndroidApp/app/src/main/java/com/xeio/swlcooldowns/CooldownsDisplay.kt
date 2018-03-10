@@ -48,6 +48,7 @@ class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferen
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, IntentFilter("updated_cooldowns"))
 
         if(CooldownData.instance.cooldowns.size == 0) {
+            visible = true
             CooldownData.instance.updateCooldowns(this)
         }
 

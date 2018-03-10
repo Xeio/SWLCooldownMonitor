@@ -8,8 +8,11 @@ import com.xeio.swlcooldowns.CooldownData
 
 class CooldownPushNotificationHandler : NotificationsHandler() {
     override fun onReceive(context: Context, bundle: Bundle) {
-        Log.i("CooldownPushNotificationHandler", "Push notification received.")
+        val character = bundle.getString("character", "")
+        val messageType = bundle.getString("messageType", "")
 
-        CooldownData.instance.updateCooldowns(context)
+        Log.i("CooldownPushNotificationHandler", "Push notification received. Character: ${character} MessageType: ${messageType}")
+
+        CooldownData.instance.updateCooldowns(context, character)
     }
 }

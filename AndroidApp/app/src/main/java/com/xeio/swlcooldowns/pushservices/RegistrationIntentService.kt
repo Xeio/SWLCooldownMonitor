@@ -16,11 +16,11 @@ class RegistrationIntentService : IntentService(TAG) {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         var regID: String = sharedPreferences.getString("registrationID", "")
         var storedToken: String = sharedPreferences.getString("FCMtoken", "")
-        val characterName = sharedPreferences.getString("pref_character_name", "")
+        val characterNames = sharedPreferences.getString("pref_character_name", "").lines().map { it.trim() }.filter { it != "" }
 
         val hub = NotificationHub(NotificationHubSettings.HubName, NotificationHubSettings.HubListenConnectionString, this)
 
-        if(characterName == "") {
+        if(!characterNames.any()) {
             hub.unregister()
             return
         }
@@ -32,9 +32,11 @@ class RegistrationIntentService : IntentService(TAG) {
             // Storing the registration ID that indicates whether the generated token has been
             // sent to your server. If it is not stored, send the token to your server,
             // otherwise your server should have already received the token.
+
+            val tags = characterNames.filter { it != "" }.joinToString(",")
             if (regID == "" || storedToken !== FCM_token ) {
                 val hub = NotificationHub(NotificationHubSettings.HubName, NotificationHubSettings.HubListenConnectionString, this)
-                regID = hub.register(FCM_token, characterName).registrationId
+                regID = hub.register(FCM_token, tags).registrationId
 
                 Log.d(TAG, "New NH Registration Successfully - RegId : " + regID)
 

@@ -13,7 +13,7 @@
         based on your message history
     </string>
 
-    <string name="character_name">Character Name</string>
+    <string name="character_names">Character Names</string>
 
     <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
     <string-array name="pref_example_list_titles">
@@ -74,6 +74,7 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="mission_name">Mission Name</string>
+    <string name="character_name">Character Name</string>
     <string name="agent_name">Agent Name</string>
     <string name="zero_time">00:00:00</string>
     <string name="completed">Completed</string>
@@ -81,4 +82,5 @@
     <string name="mission_complete">Mission Complete</string>
     <string name="mission_complete_channel">Mission Completions</string>
     <string name="mission_complete_channel_desc">Mission Complete Notifications</string>
+    <string name="character_names_hint">One character per line</string>
 </resources>

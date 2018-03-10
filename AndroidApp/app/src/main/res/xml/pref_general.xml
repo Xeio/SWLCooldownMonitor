@@ -9,13 +9,14 @@
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <EditTextPreference
+        android:hint="@string/character_names_hint"
         android:capitalize="words"
-        android:inputType="text"
+        android:inputType="textMultiLine"
         android:key="pref_character_name"
-        android:maxLines="1"
-        android:selectAllOnFocus="true"
-        android:singleLine="true"
-        android:title="@string/character_name" />
+        android:maxLines="10"
+        android:selectAllOnFocus="false"
+        android:singleLine="false"
+        android:title="@string/character_names" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog t,eo
          dismiss it. -->

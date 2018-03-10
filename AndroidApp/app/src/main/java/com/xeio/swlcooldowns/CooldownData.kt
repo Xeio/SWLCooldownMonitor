@@ -7,8 +7,8 @@ import android.preference.PreferenceManager
 import android.support.v4.content.LocalBroadcastManager
 import android.util.Log
 import android.widget.Toast
+import com.evernote.android.job.JobManager
 import com.evernote.android.job.JobRequest
-import com.evernote.android.job.JobRescheduleService
 import com.evernote.android.job.util.support.PersistableBundleCompat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -24,30 +24,42 @@ class CooldownData
     }
 
     var cooldowns = ArrayList<AgentMissionCoooldown>()
-    var lastRetrieved = System.currentTimeMillis()
-        private set
-    var lastRetrievedRtc = SystemClock.currentThreadTimeMillis()
-        private set
 
-    fun updateCooldowns(context: Context)
+    fun updateCooldowns(context: Context, character : String = "")
     {
         if(CooldownsDisplay.visible) {
             Toast.makeText(context, context.getString(R.string.cooldowns_updating), Toast.LENGTH_SHORT).show()
         }
 
+        if(character == ""){
+            cooldowns.clear()
+        }
+
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val charName = prefs.getString("pref_character_name", "")
+        val charNames = if(character == "") {
+                            prefs.getString("pref_character_name", "").lines().map { it.trim() }.filter { it != "" }}
+                        else{
+                            listOf(character)
+                        }
 
         async(CommonPool) {
-            if(charName != "") {
-                val json = URL("http://swlcooldowns.azurewebsites.net/api/GetCharacterCooldowns?char=${URLEncoder.encode(charName, "UTF-8")}").readText()
-                lastRetrieved = SystemClock.elapsedRealtime()
-                lastRetrievedRtc = System.currentTimeMillis()
+            if(charNames.any()) {
+                charNames.forEach {character ->
+                    val json = URL("http://swlcooldowns.azurewebsites.net/api/GetCharacterCooldowns?char=${URLEncoder.encode(character, "UTF-8")}").readText()
 
-                cooldowns = try {
-                    Gson().fromJson<java.util.ArrayList<AgentMissionCoooldown>>(json, object : TypeToken<List<AgentMissionCoooldown>>() {}.getType())
-                } catch (e: Exception){
-                    java.util.ArrayList<AgentMissionCoooldown>()
+                    val newCooldowns = try {
+                        Gson().fromJson<java.util.ArrayList<AgentMissionCoooldown>>(json, object : TypeToken<List<AgentMissionCoooldown>>() {}.getType())
+                    } catch (e: Exception){
+                        java.util.ArrayList<AgentMissionCoooldown>()
+                    }
+                    newCooldowns.forEach{ cooldown ->
+                        cooldown.lastRetrieved = SystemClock.elapsedRealtime()
+                        cooldown.character = character
+                    }
+
+                    cooldowns.removeIf{ it.character == character}
+                    cooldowns.addAll(newCooldowns)
+                    cooldowns.sortBy { it.lastRetrieved + it.timeLeft * 1000 }
                 }
 
                 val intent = Intent("updated_cooldowns")
@@ -59,17 +71,17 @@ class CooldownData
     }
 
     fun scheduleNextNotification(context: Context) {
-        val it = cooldowns.sortedBy { it.timeLeft }.filter { !it.notified }.firstOrNull()
-        if (it != null && it.timeLeft > 0) {
+        val it = cooldowns.sortedBy { it.timeLeft }.firstOrNull{ !it.notified && it.timeLeft > 0}
+        if (it != null) {
             Log.i("CooldownData", "Scheduling notification.")
 
             val extras = PersistableBundleCompat()
             extras.putInt("agentId", it.agentId)
+            extras.putString("character", it.character)
 
-            val timeTillNextMission = lastRetrieved - SystemClock.elapsedRealtime() + it.timeLeft * 1000;
+            val timeTillNextMission = it.lastRetrieved - SystemClock.elapsedRealtime() + it.timeLeft * 1000
 
             var builder = JobRequest.Builder(MissionCompleteJob.TAG)
-                    .setExact(timeTillNextMission)
                     .addExtras(extras)
                     .setUpdateCurrent(true)
 
@@ -80,6 +92,8 @@ class CooldownData
             }
 
             builder.build().schedule()
+        } else {
+            JobManager.create(context).cancelAllForTag(MissionCompleteJob.TAG)
         }
     }
 }

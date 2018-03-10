@@ -68,6 +68,7 @@ namespace SwlCooldownFunctions
                 {
                     data = new
                     {
+                        character,
                         messageType = "NewMissions"
                     }
                 });

@@ -28,11 +28,17 @@ class AgentCooldownAdapter(val cooldowns: ArrayList<AgentMissionCoooldown>) : Re
         fun bindItems(cooldown: AgentMissionCoooldown) {
             itemView.agentName.text = cooldown.agent
             itemView.missionName.text = cooldown.mission
+            itemView.characterName.text = cooldown.character
 
-            itemView.timer.isCountDown = true
-            itemView.timer.base = CooldownData.instance.lastRetrieved + cooldown.timeLeft * 1000
-            itemView.timer.onChronometerTickListener = this
-            itemView.timer.start()
+            if(cooldown.timeLeft > 0) {
+                itemView.timer.isCountDown = true
+                itemView.timer.base = cooldown.lastRetrieved + cooldown.timeLeft * 1000
+                itemView.timer.onChronometerTickListener = this
+                itemView.timer.start()
+            }else{
+                itemView.timer.text = itemView.context.getString(R.string.completed)
+            }
+
         }
 
         override fun onChronometerTick(chronometer: Chronometer)
@@ -40,7 +46,7 @@ class AgentCooldownAdapter(val cooldowns: ArrayList<AgentMissionCoooldown>) : Re
             if(chronometer.base <= SystemClock.elapsedRealtime())
             {
                 chronometer.stop()
-                chronometer.text = itemView.resources.getString(R.string.completed)
+                chronometer.text = chronometer.context.getString(R.string.completed)
             }
         }
     }
