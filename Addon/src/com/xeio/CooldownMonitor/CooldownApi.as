@@ -7,7 +7,7 @@ import mx.utils.Delegate;
 class com.xeio.CooldownMonitor.CooldownApi
 {
     var m_Browser:Browser;
-    var m_itemsToSubmit:Array = [];
+    var m_cooldowns:Array = [];
     var m_characterName:String;
     
     public function CooldownApi() 
@@ -15,9 +15,9 @@ class com.xeio.CooldownMonitor.CooldownApi
         m_characterName = Character.GetClientCharacter().GetName();
     }
     
-    public function QueueMissionSubmit(newPrice: CooldownItem)
+    public function QueueMissionSubmit(cooldown: CooldownItem)
     {
-        m_itemsToSubmit.push(newPrice);
+        m_cooldowns.push(cooldown);
         
         if(!m_Browser)
         {
@@ -27,23 +27,27 @@ class com.xeio.CooldownMonitor.CooldownApi
     
     public function ClearQueue()
     {
-        m_itemsToSubmit = [];
+        m_cooldowns = [];
     }
     
     private function Upload()
     {
+        var item:CooldownItem = CooldownItem(m_cooldowns.pop());
+        if (!item)
+        {
+            if (m_Browser)
+            {
+                m_Browser.SignalBrowserShowPage.Disconnect(PageLoaded, this);
+                m_Browser.CloseBrowser();
+                m_Browser = undefined;
+            }
+            return;
+        }
+        
         if (!m_Browser)
         {
             m_Browser = new Browser(_global.Enums.WebBrowserStates.e_BrowserMode_Browser, 100, 100);
             m_Browser.SignalBrowserShowPage.Connect(PageLoaded,  this);
-        }
-        
-        var item:CooldownItem = CooldownItem(m_itemsToSubmit.pop());
-        if (!item)
-        {
-            m_Browser.CloseBrowser();
-            m_Browser = undefined;
-            return;
         }
         
         var url:String = DistributedValue.GetDValue("CooldownMonitor_AddCooldownUrl") +
@@ -60,17 +64,18 @@ class com.xeio.CooldownMonitor.CooldownApi
     
     public function PageLoaded()
     {
-        if (this.m_itemsToSubmit.length == 0)
+        if (this.m_cooldowns.length == 0)
         {
+            m_Browser.SignalBrowserShowPage.Disconnect(PageLoaded, this);
             m_Browser.CloseBrowser();
             m_Browser = undefined;
         }
         else
         {
-            for (var i in m_itemsToSubmit){
-                m_itemsToSubmit[i].TimeLeft -= 1;
+            for (var i in m_cooldowns){
+                m_cooldowns[i].TimeLeft -= 2;
             }
-            setTimeout(Delegate.create(this, Upload), 1000);
+            setTimeout(Delegate.create(this, Upload), 2000);
         }
     }
 }

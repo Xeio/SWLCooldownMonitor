@@ -29,8 +29,8 @@ class com.xeio.CooldownMonitor.CooldownMonitor
 
     public function OnUnload()
     {
+        m_cooldownApi = undefined;
         AgentSystem.SignalActiveMissionsUpdated.Disconnect(MissionsUpdated, this);
-        AgentSystem.SignalMissionCompleted.Disconnect(MissionsUpdated, this);
     }
 
     public function Activate(config: Archive)
@@ -48,7 +48,8 @@ class com.xeio.CooldownMonitor.CooldownMonitor
         m_cooldownApi = new CooldownApi();
         
         AgentSystem.SignalActiveMissionsUpdated.Connect(MissionsUpdated, this);
-        AgentSystem.SignalMissionCompleted.Connect(MissionsUpdated, this);
+        
+        MissionsUpdated();
 	}
     
     public function MissionsUpdated()
