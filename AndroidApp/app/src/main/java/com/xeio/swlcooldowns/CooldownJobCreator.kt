@@ -7,6 +7,7 @@ class CooldownJobCreator : JobCreator {
     override fun create(tag: String): Job? {
         when (tag) {
             MissionCompleteJob.TAG -> return MissionCompleteJob()
+            GetCooldownsJob.TAG -> return GetCooldownsJob()
             else -> return null
         }
     }

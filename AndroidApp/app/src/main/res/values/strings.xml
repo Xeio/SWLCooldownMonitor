@@ -78,7 +78,7 @@
     <string name="agent_name">Agent Name</string>
     <string name="zero_time">00:00:00</string>
     <string name="completed">Completed</string>
-    <string name="cooldowns_updating">Cooldowns Updating</string>
+    <string name="cooldowns_updated">Cooldowns Updated</string>
     <string name="mission_complete">Mission Complete</string>
     <string name="mission_complete_channel">Mission Completions</string>
     <string name="mission_complete_channel_desc">Mission Complete Notifications</string>
