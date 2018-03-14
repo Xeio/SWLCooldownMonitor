@@ -54,9 +54,7 @@ class com.xeio.CooldownMonitor.CooldownApi
                             "api/AddAgentMission?" +
                             "char=" + escape(m_characterName) +
                             "&agent=" + escape(item.AgentName) +
-                            "&agentId=" + item.AgentId + 
                             "&mission=" + escape(item.MissionName) +
-                            "&missionId=" + item.MissionId +
                             "&timeLeft=" + item.TimeLeft;
         
         m_Browser.OpenURL(url);

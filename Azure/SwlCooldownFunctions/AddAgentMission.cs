@@ -27,15 +27,11 @@ namespace SwlCooldownFunctions
             string agentName = query.FirstOrDefault(kv => kv.Key == "agent").Value;
             string missionName = query.FirstOrDefault(kv => kv.Key == "mission").Value;
             string timeLeftString = query.FirstOrDefault(kv => kv.Key == "timeLeft").Value;
-            string agentIdString = query.FirstOrDefault(kv => kv.Key == "agentId").Value;
-            string missionIdString = query.FirstOrDefault(kv => kv.Key == "missionId").Value;
 
             if (string.IsNullOrWhiteSpace(character) ||
                 string.IsNullOrWhiteSpace(agentName) ||
                 string.IsNullOrWhiteSpace(missionName) ||
-                !int.TryParse(timeLeftString, out int timeLeft) ||
-                !int.TryParse(missionIdString, out int missionId) ||
-                !int.TryParse(agentIdString, out int agentId))
+                !int.TryParse(timeLeftString, out int timeLeft))
             {
                 log.Info("Invalid request received.");
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
@@ -50,15 +46,14 @@ namespace SwlCooldownFunctions
                 CharacterName = character,
                 AgentName = agentName,
                 MissionName = missionName,
-                MissionId = missionId,
                 EndDate = DateTime.UtcNow.AddSeconds(timeLeft),
-                AgentId = agentId
             };
             
             await agentCooldowns.ExecuteAsync(TableOperation.InsertOrReplace(cooldown));
 
-            if(existingCooldown == null || existingCooldown.MissionId != missionId)
+            if(existingCooldown == null || Math.Abs((existingCooldown.EndDate - cooldown.EndDate).TotalMinutes) > 5)
             {
+                //Trigger an push if the cooldown end dates differ
                 log.Info("New mission cooldown, sending push notification");
 
                 var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["NotificationHub"].ConnectionString;

@@ -74,7 +74,7 @@ class CooldownData
             Log.i("CooldownData", "Scheduling notification.")
 
             val extras = PersistableBundleCompat()
-            extras.putInt("agentId", it.agentId)
+            extras.putString("agent", it.agent)
             extras.putString("character", it.character)
 
             val timeTillNextMission = it.lastRetrieved - SystemClock.elapsedRealtime() + it.timeLeft * 1000

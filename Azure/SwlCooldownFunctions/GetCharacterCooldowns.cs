@@ -41,8 +41,7 @@ namespace SwlCooldownFunctions
                 {
                     agent = cd.AgentName,
                     mission = cd.MissionName,
-                    timeLeft = cd.EndDate > now ? (int)(cd.EndDate - now).TotalSeconds : 0,
-                    agentId = cd.AgentId
+                    timeLeft = cd.EndDate > now ? (int)(cd.EndDate - now).TotalSeconds : 0
                 });
             
             return new HttpResponseMessage(HttpStatusCode.OK) {

@@ -17,10 +17,10 @@ class MissionCompleteJob : Job() {
     override fun onRunJob(params: Params): Result {
         Log.i("NotificationAlarmReceiver", "Mission complete notification.")
 
-        val agentId = params.extras.getInt("agentId", 0)
+        val agent = params.extras.getString("agent", "")
         val character = params.extras.getString("character", "")
 
-        val cooldown = CooldownData.instance.cooldowns.firstOrNull { it.agentId == agentId && it.character == character}
+        val cooldown = CooldownData.instance.cooldowns.firstOrNull { it.agent == agent && it.character == character}
 
         if(cooldown != null){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -54,7 +54,8 @@ class MissionCompleteJob : Job() {
             }
 
 //                    .setGroup("MISSION_COMPLETE")
-            notificationManager.notify(cooldown.agentId xor cooldown.character.hashCode(), agentBuilder.build())
+            notificationManager.notify(cooldown.agent.hashCode() xor cooldown.character.hashCode(), agentBuilder.build())
+
 
             cooldown.notified = true
 

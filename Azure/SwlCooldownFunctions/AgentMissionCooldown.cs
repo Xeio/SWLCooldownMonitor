@@ -9,7 +9,5 @@ namespace SwlCooldownFunctions
         public string AgentName { get; set; }
         public string MissionName { get; set; }
         public DateTime EndDate { get; set; }
-        public int AgentId { get; set; }
-        public int MissionId { get; set; }
     }
 }
