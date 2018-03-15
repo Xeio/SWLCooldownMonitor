@@ -12,6 +12,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import android.support.annotation.RequiresApi
+import org.jetbrains.anko.bundleOf
 
 class MissionCompleteJob : Job() {
     override fun onRunJob(params: Params): Result {
@@ -27,38 +28,36 @@ class MissionCompleteJob : Job() {
                 createNotificationChannel(context)
             }
 
-            val myIntent = Intent(context, CooldownsDisplay::class.java)
-            val activityIntent = PendingIntent.getActivity(context, 0, myIntent, 0)
+            val displayIntent = Intent(context, CooldownsDisplay::class.java)
+            val activityIntent = PendingIntent.getActivity(context, 0, displayIntent, 0)
 
-            val notificationManager = NotificationManagerCompat.from(context)
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
 
-//            val groupBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-//                    .setSmallIcon(R.drawable.notification_template_icon_bg)
-//                    .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
-//                    .setGroup("MISSION_COMPLETE")
-//                    .setAutoCancel(true)
-//                    .setGroupSummary(true)
-//            notificationManager.notify(0, groupBuilder.build())
+            val notificationId = character.hashCode()
+            var text = context.getString(R.string.agent_has_completed_a_mission).format(cooldown.agent)
+
+            val currentNotification = notificationManager.activeNotifications.firstOrNull { it.id == notificationId}
+            if(currentNotification != null)
+            {
+                val currentText = currentNotification.notification.extras.getString("textContent")
+                if(!currentText.contains(character)) {
+                    text = currentText + "\n" + text
+                }
+            }
 
             var agentBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
                     .setSmallIcon(R.drawable.agent_notifiction_icon)
                     .setContentIntent(activityIntent)
-                    .setContentTitle(context.getString(R.string.mission_complete))
+                    .setContentTitle(context.getString(R.string.mission_complete).format(character))
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+                    .setContentText(text)
+                    .setExtras(bundleOf(Pair("textContent", text)))
                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                     .setAutoCancel(true)
 
-            agentBuilder = if(CooldownData.instance.characterCount > 1){
-                agentBuilder.setContentText("${cooldown.character}: ${cooldown.agent} has completed a mission.")
-            }else{
-                agentBuilder.setContentText("${cooldown.agent} has completed a mission.")
-            }
-
-//                    .setGroup("MISSION_COMPLETE")
-            notificationManager.notify(cooldown.agent.hashCode() xor cooldown.character.hashCode(), agentBuilder.build())
-
+            notificationManager.notify( cooldown.character.hashCode(), agentBuilder.build())
 
             cooldown.notified = true
-
             CooldownData.instance.scheduleNextNotification(context)
         }
 
