@@ -45,11 +45,12 @@ class CooldownData
 
         charNames.forEach {character ->
             Log.i("CooldownData", "Fetching missions for character: $character")
-            val json = URL("http://swlcooldowns.azurewebsites.net/api/GetCharacterCooldowns?char=${URLEncoder.encode(character, "UTF-8")}").readText()
 
             val newCooldowns = try {
+                val json = URL("http://swlcooldowns.azurewebsites.net/api/GetCharacterCooldowns?char=${URLEncoder.encode(character, "UTF-8")}").readText()
                 Gson().fromJson<java.util.ArrayList<AgentMissionCoooldown>>(json, object : TypeToken<List<AgentMissionCoooldown>>() {}.getType())
             } catch (e: Exception){
+                GetCooldownsJob.createJob(character, 1000 * 60 * 5)
                 java.util.ArrayList<AgentMissionCoooldown>()
             }
             newCooldowns.forEach{ cooldown ->

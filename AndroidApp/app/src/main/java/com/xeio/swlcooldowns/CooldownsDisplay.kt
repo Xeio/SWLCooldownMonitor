@@ -61,10 +61,7 @@ class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferen
         JobManager.create(this).addJobCreator(CooldownJobCreator())
 
         if(CooldownData.instance.cooldowns.size == 0) {
-            JobRequest.Builder(GetCooldownsJob.TAG)
-                    .setUpdateCurrent(true)
-                    .startNow()
-                    .build().schedule()
+            GetCooldownsJob.createJob()
         } else {
             cooldownsRecyclerView.adapter = AgentCooldownAdapter(CooldownData.instance.cooldowns)
         }
@@ -73,10 +70,7 @@ class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferen
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
         if(key == "pref_character_name"){
             registerWithNotificationHubs()
-            JobRequest.Builder(GetCooldownsJob.TAG)
-                    .setUpdateCurrent(true)
-                    .startNow()
-                    .build().schedule()
+            GetCooldownsJob.createJob()
         }
     }
 
@@ -118,10 +112,7 @@ class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferen
                 true
             }
             R.id.action_refresh -> {
-                JobRequest.Builder(GetCooldownsJob.TAG)
-                        .setUpdateCurrent(true)
-                        .startNow()
-                        .build().schedule()
+                GetCooldownsJob.createJob()
                 true
             }
             else -> super.onOptionsItemSelected(item)
