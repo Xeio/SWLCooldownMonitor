@@ -4,6 +4,7 @@ import com.GameInterface.AgentSystemMission;
 import com.Utils.Archive;
 import com.xeio.CooldownMonitor.CooldownApi;
 import com.xeio.CooldownMonitor.CooldownItem;
+import com.xeio.CooldownMonitor.Utils;
 import mx.utils.Delegate;
 
 class com.xeio.CooldownMonitor.CooldownMonitor
@@ -11,6 +12,8 @@ class com.xeio.CooldownMonitor.CooldownMonitor
     private var m_swfRoot: MovieClip;
     
     private var m_cooldownApi: CooldownApi;
+    private var m_timeout: Number;
+    private var m_lastSentMissions:Array = [];
 
     public static function main(swfRoot:MovieClip):Void 
     {
@@ -47,12 +50,57 @@ class com.xeio.CooldownMonitor.CooldownMonitor
 	{
         m_cooldownApi = new CooldownApi();
         
-        AgentSystem.SignalActiveMissionsUpdated.Connect(MissionsUpdated, this);
+        AgentSystem.SignalActiveMissionsUpdated.Connect(ScheduleUpdateCheck, this);
         
-        setTimeout(Delegate.create(this, MissionsUpdated), 10000);
+        ScheduleUpdateCheck();
 	}
     
+    public function ScheduleUpdateCheck()
+    {
+        clearTimeout(m_timeout);
+        m_timeout = setTimeout(Delegate.create(this, MissionsUpdated), 2000);
+    }
+    
     public function MissionsUpdated()
+    {
+        if (NeedsUpdate())
+        {
+            m_lastSentMissions = [];
+            
+            var activeMissions:Array =  AgentSystem.GetActiveMissions();
+            for (var i in activeMissions)
+            {
+                var mission:AgentSystemMission = activeMissions[i];
+                m_lastSentMissions.push(mission.m_MissionId);
+            }
+            
+            SendMissions();
+        }
+    }
+    
+    public function NeedsUpdate():Boolean
+    {
+        var activeMissions:Array =  AgentSystem.GetActiveMissions();
+        
+        if (activeMissions.length > m_lastSentMissions.length)
+        {
+            return true;
+        }
+        
+        for (var i in activeMissions)
+        {
+            var mission:AgentSystemMission = activeMissions[i];
+            
+            if (!Utils.Contains(m_lastSentMissions, mission.m_MissionId))
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public function SendMissions()
     {
         m_cooldownApi.ClearQueue();
         var activeMissions:Array =  AgentSystem.GetActiveMissions();
