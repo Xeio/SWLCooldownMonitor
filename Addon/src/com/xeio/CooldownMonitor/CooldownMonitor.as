@@ -49,7 +49,7 @@ class com.xeio.CooldownMonitor.CooldownMonitor
         
         AgentSystem.SignalActiveMissionsUpdated.Connect(MissionsUpdated, this);
         
-        MissionsUpdated();
+        setTimeout(Delegate.create(this, MissionsUpdated), 10000);
 	}
     
     public function MissionsUpdated()

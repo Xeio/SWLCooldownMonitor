@@ -8,6 +8,7 @@ class com.xeio.CooldownMonitor.CooldownApi
 {
     var m_Browser:Browser;
     var m_cooldowns:Array = [];
+    var m_timeout:Number;
     var m_characterName:String;
     
     public function CooldownApi() 
@@ -73,7 +74,8 @@ class com.xeio.CooldownMonitor.CooldownApi
             for (var i in m_cooldowns){
                 m_cooldowns[i].TimeLeft -= 2;
             }
-            setTimeout(Delegate.create(this, Upload), 2000);
+            clearTimeout(m_timeout);
+            m_timeout = setTimeout(Delegate.create(this, Upload), 2000);
         }
     }
 }
