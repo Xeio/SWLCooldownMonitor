@@ -14,6 +14,7 @@ import android.preference.PreferenceActivity
 import android.preference.PreferenceFragment
 import android.preference.PreferenceManager
 import android.preference.RingtonePreference
+import android.provider.Settings
 import android.text.TextUtils
 import android.view.MenuItem
 import android.support.v4.app.NavUtils
@@ -58,6 +59,21 @@ class SettingsActivity : AppCompatPreferenceActivity() {
      */
     override fun onIsMultiPane(): Boolean {
         return isXLargeTablet(this)
+    }
+
+    override fun onHeaderClick(header: Header?, position: Int) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && header?.id == R.id.notification_settings_menu.toLong())
+        {
+            MissionCompleteJob.ensureNotificationChannelExists(this)
+
+            val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, this.packageName)
+                    .putExtra(Settings.EXTRA_CHANNEL_ID, MissionCompleteJob.NOTIFICATION_CHANNEL_ID)
+            startActivity(intent)
+
+            return
+        }
+        super.onHeaderClick(header, position)
     }
 
     /**
@@ -122,7 +138,7 @@ class SettingsActivity : AppCompatPreferenceActivity() {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"))
+            bindPreferenceSummaryToValue(findPreference("pref_notification_sound"))
         }
 
         override fun onOptionsItemSelected(item: MenuItem): Boolean {

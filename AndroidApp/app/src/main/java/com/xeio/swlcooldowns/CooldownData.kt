@@ -70,7 +70,11 @@ class CooldownData
         val intent = Intent("updated_cooldowns")
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
 
-        scheduleNextNotification(context)
+        if(MissionCompleteJob.areNotificationsEnabled(context)) {
+            scheduleNextNotification(context)
+        } else {
+            JobManager.instance().cancelAllForTag(MissionCompleteJob.TAG)
+        }
     }
 
     fun scheduleNextNotification(context: Context) {

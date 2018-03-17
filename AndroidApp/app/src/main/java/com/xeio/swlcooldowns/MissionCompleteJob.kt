@@ -1,15 +1,17 @@
 package com.xeio.swlcooldowns
 
+import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.RingtoneManager
 import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.evernote.android.job.Job
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.net.Uri
 import android.os.Build
+import android.preference.PreferenceManager
 import android.support.annotation.RequiresApi
 import org.jetbrains.anko.bundleOf
 
@@ -24,7 +26,7 @@ class MissionCompleteJob : Job() {
 
         if(cooldown != null){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel(context)
+                ensureNotificationChannelExists(context)
             }
 
             val displayIntent = Intent(context, CooldownsDisplay::class.java)
@@ -44,14 +46,16 @@ class MissionCompleteJob : Job() {
                 }
             }
 
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             var agentBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+                    .setDefaults(Notification.DEFAULT_LIGHTS or Notification.DEFAULT_VIBRATE)
                     .setSmallIcon(R.drawable.agent_notifiction_icon)
                     .setContentIntent(activityIntent)
                     .setContentTitle(context.getString(R.string.mission_complete).format(character))
                     .setStyle(NotificationCompat.BigTextStyle().bigText(text))
                     .setContentText(text)
                     .setExtras(bundleOf(Pair("textContent", text)))
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                    .setSound(Uri.parse(prefs.getString("pref_notification_sound", "")))
                     .setAutoCancel(true)
 
             notificationManager.notify( cooldown.character.hashCode(), agentBuilder.build())
@@ -63,17 +67,36 @@ class MissionCompleteJob : Job() {
         return Result.SUCCESS
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel(context: Context){
-        val name = context.getString(R.string.mission_complete_channel)
-        val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT)
-        channel.description = context.getString(R.string.mission_complete_channel_desc)
-        val notificationManager = context.getSystemService(NotificationManager::class.java)
-        notificationManager.createNotificationChannel(channel)
-    }
-
     companion object {
         val TAG = "mission_complete_job"
         val NOTIFICATION_CHANNEL_ID = "Mission Completions"
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun ensureNotificationChannelExists(context: Context){
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            if(notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID) == null) {
+                val name = context.getString(R.string.mission_complete_channel)
+                val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT)
+                channel.description = context.getString(R.string.mission_complete_channel_desc)
+                notificationManager.createNotificationChannel(channel)
+            }
+        }
+
+        fun areNotificationsEnabled(context: Context) : Boolean
+        {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                return isNotificationChannelEnabled(context)
+            }
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            return prefs.getBoolean("pref_show_notifications", true)
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        private fun isNotificationChannelEnabled(context: Context) : Boolean
+        {
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            val channel = notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID)
+            return channel.importance != NotificationManager.IMPORTANCE_NONE
+        }
     }
 }
