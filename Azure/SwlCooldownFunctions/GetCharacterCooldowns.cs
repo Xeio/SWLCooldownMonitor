@@ -22,6 +22,7 @@ namespace SwlCooldownFunctions
             var queryStrings = req.GetQueryNameValuePairs();
 
             string character = queryStrings.FirstOrDefault(kv => kv.Key == "char").Value;
+            bool patron = queryStrings.Any(kv => kv.Key == "patron");
 
             if (string.IsNullOrWhiteSpace(character))
             {
@@ -35,7 +36,7 @@ namespace SwlCooldownFunctions
             var now = DateTime.UtcNow;
             var cooldowns = result.Results
                 .OrderByDescending(cd => cd.EndDate)
-                .Take(3) //Max number of active missions is 3 currently
+                .Take(patron ? 3 : 2) //Max number of active missions is 3 currently
                 .OrderBy(cd => cd.EndDate)
                 .Select(cd => new
                 {

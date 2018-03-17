@@ -7,12 +7,6 @@
 
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
-
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact
-        based on your message history
-    </string>
-
     <string name="character_names">Character Names</string>
 
     <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
@@ -85,4 +79,6 @@
     <string name="character_names_hint">One character per line</string>
     <string name="refresh">Refresh</string>
     <string name="agent_has_completed_a_mission">%s has completed a mission.</string>
+    <string name="pref_title_patron">Patron</string>
+    <string name="pref_description_patron">Shows 3 mission cooldowns</string>
 </resources>

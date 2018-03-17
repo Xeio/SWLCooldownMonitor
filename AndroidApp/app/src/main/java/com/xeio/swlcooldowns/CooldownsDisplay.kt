@@ -22,7 +22,6 @@ import com.xeio.swlcooldowns.pushservices.CooldownPushNotificationHandler
 import com.xeio.swlcooldowns.pushservices.NotificationHubSettings
 import com.xeio.swlcooldowns.pushservices.RegistrationIntentService
 import com.evernote.android.job.JobManager
-import com.evernote.android.job.JobRequest
 
 class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener  {
     companion object{
@@ -68,9 +67,15 @@ class CooldownsDisplay : AppCompatActivity(), SharedPreferences.OnSharedPreferen
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        if(key == "pref_character_name"){
-            registerWithNotificationHubs()
-            GetCooldownsJob.createJob()
+        when(key)
+        {
+            "pref_patron" -> {
+                GetCooldownsJob.createJob()
+            }
+            "pref_character_name" -> {
+                registerWithNotificationHubs()
+                GetCooldownsJob.createJob()
+            }
         }
     }
 

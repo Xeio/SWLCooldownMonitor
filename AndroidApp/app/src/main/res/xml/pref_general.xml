@@ -1,13 +1,4 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <!--<SwitchPreference-->
-        <!--android:defaultValue="true"-->
-        <!--android:key="example_switch"-->
-        <!--android:summary="@string/pref_description_social_recommendations"-->
-        <!--android:title="@string/pref_title_social_recommendations" />-->
-
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <EditTextPreference
         android:hint="@string/character_names_hint"
         android:capitalize="words"
@@ -17,6 +8,12 @@
         android:selectAllOnFocus="false"
         android:singleLine="false"
         android:title="@string/character_names" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="pref_patron"
+        android:summary="@string/pref_description_patron"
+        android:title="@string/pref_title_patron" />
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog t,eo
          dismiss it. -->
