@@ -1,5 +1,6 @@
 package com.xeio.swlcooldowns
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
@@ -43,23 +44,31 @@ class CooldownData
             characterCount = charNames.size
         }
 
-        charNames.forEach {character ->
+        charNames.forEach { character ->
             Log.i("CooldownData", "Fetching missions for character: $character")
 
+            val patron = prefs.getBoolean("pref_patron", false)
             val newCooldowns = try {
                 var params = "char=${URLEncoder.encode(character, "UTF-8")}"
-                if(prefs.getBoolean("pref_patron", false)){
+                if (patron) {
                     params += "&patron"
                 }
                 val json = URL("http://swlcooldowns.azurewebsites.net/api/GetCharacterCooldowns?$params").readText()
                 Gson().fromJson<java.util.ArrayList<AgentMissionCoooldown>>(json, object : TypeToken<List<AgentMissionCoooldown>>() {}.getType())
-            } catch (e: Exception){
+            } catch (e: Exception) {
                 GetCooldownsJob.createJob(character, 1000 * 60 * 5)
                 java.util.ArrayList<AgentMissionCoooldown>()
             }
-            newCooldowns.forEach{ cooldown ->
+            newCooldowns.forEach { cooldown ->
                 cooldown.lastRetrieved = SystemClock.elapsedRealtime()
                 cooldown.character = character
+            }
+
+            if (newCooldowns.count { it.timeLeft > 0 } == if(patron){ 3 } else{ 2 })
+            {
+                //If all missions slots for the character are active, clear that character's notification,
+                val notificationManager = context.getSystemService(NotificationManager::class.java)
+                notificationManager.cancel(character.hashCode())
             }
 
             cooldowns.removeIf{ it.character == character}
