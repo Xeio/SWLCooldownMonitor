@@ -113,7 +113,7 @@ class com.xeio.CooldownMonitor.CooldownMonitor
                 var cooldown:CooldownItem = new CooldownItem();
                 cooldown.AgentName = agent.m_Name;
                 cooldown.MissionName = mission.m_MissionName;
-                cooldown.TimeLeft = AgentSystem.GetMissionCompleteTime(mission.m_MissionId) - com.GameInterface.Utils.GetServerSyncedTime();
+                cooldown.MissionId = mission.m_MissionId;
                 m_cooldownApi.QueueMissionSubmit(cooldown);
             }
         }        

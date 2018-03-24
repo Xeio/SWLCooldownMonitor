@@ -8,5 +8,5 @@ class com.xeio.CooldownMonitor.CooldownItem
     
     public var AgentName : String;
     public var MissionName : String;
-    public var TimeLeft : Number;
+    public var MissionId : Number;
 }
