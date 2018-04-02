@@ -61,7 +61,7 @@ class MissionCompleteJob : Job() {
             notificationManager.notify( cooldown.character.hashCode(), agentBuilder.build())
 
             cooldown.notified = true
-            CooldownData.instance.scheduleNextNotification(context)
+            CooldownData.instance.scheduleNextNotification()
         }
 
         return Result.SUCCESS

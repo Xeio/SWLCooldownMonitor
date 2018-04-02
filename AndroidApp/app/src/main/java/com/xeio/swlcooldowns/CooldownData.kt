@@ -54,7 +54,7 @@ class CooldownData
                     params += "&patron"
                 }
                 val json = URL("http://swlcooldowns.azurewebsites.net/api/GetCharacterCooldowns?$params").readText()
-                Gson().fromJson<java.util.ArrayList<AgentMissionCoooldown>>(json, object : TypeToken<List<AgentMissionCoooldown>>() {}.getType())
+                Gson().fromJson<java.util.ArrayList<AgentMissionCoooldown>>(json, object : TypeToken<List<AgentMissionCoooldown>>() {}.type)
             } catch (e: Exception) {
                 GetCooldownsJob.createJob(character, 1000 * 60 * 5)
                 java.util.ArrayList<AgentMissionCoooldown>()
@@ -80,13 +80,13 @@ class CooldownData
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
 
         if(MissionCompleteJob.areNotificationsEnabled(context)) {
-            scheduleNextNotification(context)
+            scheduleNextNotification()
         } else {
             JobManager.instance().cancelAllForTag(MissionCompleteJob.TAG)
         }
     }
 
-    fun scheduleNextNotification(context: Context) {
+    fun scheduleNextNotification() {
         val it = cooldowns.sortedBy { it.timeLeft }.firstOrNull{ !it.notified && it.timeLeft > 0}
         if (it != null) {
             Log.i("CooldownData", "Scheduling notification.")
